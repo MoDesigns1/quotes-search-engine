@@ -1,8 +1,12 @@
+import time
 import requests
 from bs4 import BeautifulSoup
+from urllib.parse import urljoin, urlparse
 
 
 TIMEOUT = 10
+BASE_URL = "https://quotes.toscrape.com/"
+SLEEP = 6
 
 
 def fetch_page(url):
@@ -34,3 +38,40 @@ def parse_page(html):
     links = [a["href"] for a in soup.find_all("a", href=True)]
 
     return text, links
+
+
+def crawl():
+    visited = set()
+    queue = [BASE_URL]
+    results = []
+
+    while queue:
+        url = queue.pop(0)
+
+        if url in visited:
+            continue
+
+        print(f"crawling: {url}")
+        html = fetch_page(url)
+        visited.add(url)
+
+        if html is None:
+            continue
+
+        text, links = parse_page(html)
+        results.append({"url": url, "text": text})
+
+        for link in links:
+            absolute = urljoin(url, link)
+            # drop query strings / fragments and keep it clean
+            absolute = urlparse(absolute)._replace(query="", fragment="").geturl()
+
+            if urlparse(absolute).netloc != urlparse(BASE_URL).netloc:
+                continue  # stay on domain
+
+            if absolute not in visited:
+                queue.append(absolute)
+
+        time.sleep(SLEEP)
+
+    return results
