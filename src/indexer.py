@@ -30,6 +30,7 @@ def build_index(crawl_results):
 
 
 def save_index(index, path="data/index.json"):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as f:
         json.dump(index, f)
 
