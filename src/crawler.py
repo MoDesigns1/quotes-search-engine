@@ -1,7 +1,8 @@
+import re
 import time
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 
 
 TIMEOUT = 10
@@ -62,12 +63,10 @@ def crawl():
         results.append({"url": url, "text": text})
 
         for link in links:
-            absolute = urljoin(url, link)
-            # drop query strings / fragments and keep it clean
-            absolute = urlparse(absolute)._replace(query="", fragment="").geturl()
+            if not re.match(r"^/page/\d+/$", link):
+                continue
 
-            if urlparse(absolute).netloc != urlparse(BASE_URL).netloc:
-                continue  # stay on domain
+            absolute = urljoin(url, link)
 
             if absolute not in visited:
                 queue.append(absolute)
