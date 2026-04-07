@@ -27,6 +27,19 @@ def handle_load():
         print(f"Index loaded successfully. {len(index)} unique words.")
 
 
+def handle_find(word):
+    if index is None:
+        print("Index not loaded. Run 'load' or 'build' first.")
+        return
+    if word not in index:
+        print(f"'{word}' not found in index.")
+        return
+    urls = list(index[word].keys())
+    print(f"'{word}' found in {len(urls)} page(s):")
+    for url in urls:
+        print(f"  {url}")
+
+
 def handle_print(word):
     if index is None:
         print("Index not loaded. Run 'load' or 'build' first.")
@@ -48,6 +61,8 @@ while True:
         handle_build()
     elif command == "load":
         handle_load()
+    elif command.startswith("find "):
+        handle_find(command[5:].strip())
     elif command.startswith("print "):
         handle_print(command[6:].strip())
     elif command in ("exit", "quit"):
@@ -55,4 +70,4 @@ while True:
     elif command == "":
         continue
     else:
-        print(f"Unknown command: '{command}'. Available commands: build, load, print <word>, exit")
+        print(f"Unknown command: '{command}'. Available commands: build, load, find <word>, print <word>, exit")
