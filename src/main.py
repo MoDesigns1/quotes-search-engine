@@ -27,15 +27,21 @@ def handle_load():
         print(f"Index loaded successfully. {len(index)} unique words.")
 
 
-def handle_find(word):
+def handle_find(query):
     if index is None:
         print("Index not loaded. Run 'load' or 'build' first.")
         return
-    if word not in index:
-        print(f"'{word}' not found in index.")
+    words = query.split()
+    for word in words:
+        if word not in index:
+            print(f"'{word}' not found in index.")
+            return
+    url_sets = [set(index[w].keys()) for w in words]
+    urls = sorted(url_sets[0].intersection(*url_sets[1:]))
+    if not urls:
+        print(f"No pages contain all of: {', '.join(words)}")
         return
-    urls = list(index[word].keys())
-    print(f"'{word}' found in {len(urls)} page(s):")
+    print(f"Found {len(urls)} page(s) containing all of: {', '.join(words)}:")
     for url in urls:
         print(f"  {url}")
 
