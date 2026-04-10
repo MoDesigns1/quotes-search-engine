@@ -1,4 +1,3 @@
-import re
 import time
 import requests
 from bs4 import BeautifulSoup
@@ -63,12 +62,9 @@ def crawl():
         results.append({"url": url, "text": text})
 
         for link in links:
-            if not re.match(r"^/page/\d+/$", link):
-                continue
+            absolute = urljoin(BASE_URL, link)
 
-            absolute = urljoin(url, link)
-
-            if absolute not in visited:
+            if absolute.startswith(BASE_URL) and absolute not in visited:
                 queue.append(absolute)
 
         time.sleep(SLEEP)
