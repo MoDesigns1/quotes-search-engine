@@ -1,3 +1,4 @@
+import math
 from crawler import crawl
 from indexer import build_index, save_index, load_index
 
@@ -31,19 +32,45 @@ def handle_find(query):
     if index is None:
         print("Index not loaded. Run 'load' or 'build' first.")
         return
+
+    page_lengths = index.get("_page_lengths", {})
+    if not page_lengths:
+        print("Index missing page lengths — rebuild the index to enable TF-IDF ranking.")
+        return
+
     words = query.split()
     for word in words:
         if word not in index:
             print(f"'{word}' not found in index.")
             return
+
+    # find pages that contain every query word
     url_sets = [set(index[w].keys()) for w in words]
-    urls = sorted(url_sets[0].intersection(*url_sets[1:]))
+    urls = url_sets[0].intersection(*url_sets[1:])
     if not urls:
         print(f"No pages contain all of: {', '.join(words)}")
         return
-    print(f"Found {len(urls)} page(s) containing all of: {', '.join(words)}:")
+
+    total_pages = len(page_lengths)
+
+    # rank results with TF-IDF
+    # tf  = freq on this page / total words on page  (how much this page talks about the word)
+    # idf = log(total pages / pages containing word) (rarer words get more weight)
+    # score = sum of tf*idf across all query words, higher is better
+    scored = []
     for url in urls:
-        print(f"  {url}")
+        score = 0
+        for word in words:
+            tf = index[word][url]["freq"] / page_lengths[url]
+            idf = math.log(total_pages / len(index[word]))
+            score += tf * idf
+        scored.append((url, score))
+
+    scored.sort(key=lambda x: x[1], reverse=True)
+
+    print(f"Found {len(scored)} page(s) containing all of: {', '.join(words)}:")
+    for url, score in scored:
+        print(f"  {url}  (score: {score:.4f})")
 
 
 def handle_print(word):

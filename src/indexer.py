@@ -11,10 +11,12 @@ def tokenize(text):
 def build_index(crawl_results):
     # crawl_results is a list of {"url": ..., "text": ...} dicts
     index = {}
+    page_lengths = {}  # url -> total word count, used for TF-IDF scoring
 
     for doc in crawl_results:
         url = doc["url"]
         words = tokenize(doc["text"])
+        page_lengths[url] = len(words)
 
         for position, word in enumerate(words):
             if word not in index:
@@ -26,6 +28,8 @@ def build_index(crawl_results):
             index[word][url]["freq"] += 1
             index[word][url]["positions"].append(position)
 
+    # stored under a special key so save/load picks it up automatically
+    index["_page_lengths"] = page_lengths
     return index
 
 
