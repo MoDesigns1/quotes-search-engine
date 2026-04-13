@@ -3,6 +3,12 @@
 A simple search engine that crawls quotes.toscrape.com, builds an inverted index,
 and lets you search for quotes by keyword. Uses TF-IDF scoring to rank results.
 
+## Dependencies
+
+- `requests` — fetches pages during crawling
+- `beautifulsoup4` — parses HTML to extract text and links
+- `pytest` / `pytest-cov` — running tests and coverage reports
+
 ## Install
 
 ```
