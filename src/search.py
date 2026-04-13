@@ -1,7 +1,7 @@
 import math
 
 
-def find(index, query):
+def find(index: dict, query: str) -> list[tuple[str, float]]:
     # return a list of (url, score) sorted by TF-IDF descending or 
     # [] for an empty query, an unknown word, or no matching pages
     

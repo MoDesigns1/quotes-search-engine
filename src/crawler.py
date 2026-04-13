@@ -9,7 +9,7 @@ BASE_URL = "https://quotes.toscrape.com/"
 SLEEP = 6
 
 
-def fetch_page(url):
+def fetch_page(url: str) -> str | None:
     try:
         response = requests.get(url, timeout=TIMEOUT)
     except requests.exceptions.Timeout:
@@ -26,7 +26,7 @@ def fetch_page(url):
     return response.text
 
 
-def parse_page(html):
+def parse_page(html: str) -> tuple[str, list[str]]:
     soup = BeautifulSoup(html, "html.parser")
 
     # strip out script/style tags so we don't get js/css in the text
@@ -40,7 +40,7 @@ def parse_page(html):
     return text, links
 
 
-def crawl():
+def crawl() -> list[dict]:
     visited = set()
     queue = [BASE_URL]
     results = []

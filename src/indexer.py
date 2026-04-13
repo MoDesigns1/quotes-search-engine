@@ -3,12 +3,12 @@ import json
 import os
 
 
-def tokenize(text):
+def tokenize(text: str) -> list[str]:
     words = re.findall(r"[a-z]+", text.lower())
     return words
 
 
-def build_index(crawl_results):
+def build_index(crawl_results: list[dict]) -> dict:
     # crawl_results is a list of {"url": ..., "text": ...} dicts
     index = {}
     page_lengths = {}  # url -> total word count, used for TF-IDF scoring
@@ -33,13 +33,13 @@ def build_index(crawl_results):
     return index
 
 
-def save_index(index, path="data/index.json"):
+def save_index(index: dict, path: str = "data/index.json") -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as f:
         json.dump(index, f)
 
 
-def load_index(path="data/index.json"):
+def load_index(path: str = "data/index.json") -> dict:
     if not os.path.exists(path):
         print(f"Error: {path} not found. Run the crawler and build the index first.")
         return {}
