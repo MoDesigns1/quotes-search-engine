@@ -1,5 +1,9 @@
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../src"))
+
 from unittest.mock import patch, MagicMock
-from src.crawler import fetch_page, parse_page, crawl
+from crawler import fetch_page, parse_page, crawl
 
 # fetch_page
 
@@ -8,7 +12,7 @@ def test_fetch_page_returns_html_on_200():
     mock_response.status_code = 200
     mock_response.text = "<html>hello</html>"
 
-    with patch("src.crawler.requests.get", return_value=mock_response):
+    with patch("crawler.requests.get", return_value=mock_response):
         result = fetch_page("https://example.com")
 
     assert result == "<html>hello</html>"
@@ -18,7 +22,7 @@ def test_fetch_page_returns_none_on_404():
     mock_response = MagicMock()
     mock_response.status_code = 404
 
-    with patch("src.crawler.requests.get", return_value=mock_response):
+    with patch("crawler.requests.get", return_value=mock_response):
         result = fetch_page("https://example.com/missing")
 
     assert result is None
@@ -27,7 +31,7 @@ def test_fetch_page_returns_none_on_404():
 def test_fetch_page_returns_none_on_timeout():
     import requests as req
 
-    with patch("src.crawler.requests.get", side_effect=req.exceptions.Timeout):
+    with patch("crawler.requests.get", side_effect=req.exceptions.Timeout):
         result = fetch_page("https://example.com")
 
     assert result is None
@@ -36,7 +40,7 @@ def test_fetch_page_returns_none_on_timeout():
 def test_fetch_page_returns_none_on_connection_error():
     import requests as req
 
-    with patch("src.crawler.requests.get", side_effect=req.exceptions.ConnectionError):
+    with patch("crawler.requests.get", side_effect=req.exceptions.ConnectionError):
         result = fetch_page("https://example.com")
 
     assert result is None
@@ -96,8 +100,8 @@ def test_crawl_visits_linked_pages():
         mock.text = page2 if "page/2" in url else page1
         return mock
 
-    with patch("src.crawler.requests.get", side_effect=fake_get), \
-         patch("src.crawler.time.sleep"):  # don't actually sleep in tests
+    with patch("crawler.requests.get", side_effect=fake_get), \
+         patch("crawler.time.sleep"):  # don't actually sleep in tests
         results = crawl()
 
     urls_visited = [r["url"] for r in results]
@@ -112,8 +116,8 @@ def test_crawl_does_not_visit_same_page_twice():
     mock_response.status_code = 200
     mock_response.text = page
 
-    with patch("src.crawler.requests.get", return_value=mock_response), \
-         patch("src.crawler.time.sleep"):
+    with patch("crawler.requests.get", return_value=mock_response), \
+         patch("crawler.time.sleep"):
         results = crawl()
 
     # base URL should only appear once in results
@@ -134,8 +138,8 @@ def test_crawl_skips_failed_pages():
             mock.text = page1
         return mock
 
-    with patch("src.crawler.requests.get", side_effect=fake_get), \
-         patch("src.crawler.time.sleep"):
+    with patch("crawler.requests.get", side_effect=fake_get), \
+         patch("crawler.time.sleep"):
         results = crawl()
 
     # only page 1 should be in results - page 2 failed so nothing was saved for it
