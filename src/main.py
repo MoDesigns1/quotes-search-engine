@@ -35,7 +35,7 @@ def handle_find(query):
 
     page_lengths = index.get("_page_lengths", {})
     if not page_lengths:
-        print("Index missing page lengths — rebuild the index to enable TF-IDF ranking.")
+        print("Rebuild the index to enable TF-IDF ranking.")
         return
 
     words = query.split()
