@@ -2,6 +2,8 @@ import re
 import json
 import os
 
+DEFAULT_INDEX_PATH = os.path.join(os.path.dirname(__file__), "data", "index.json")
+
 
 def tokenize(text: str) -> list[str]:
     words = re.findall(r"[a-z]+", text.lower())
@@ -33,13 +35,13 @@ def build_index(crawl_results: list[dict]) -> dict:
     return index
 
 
-def save_index(index: dict, path: str = "data/index.json") -> None:
+def save_index(index: dict, path: str = DEFAULT_INDEX_PATH) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as f:
         json.dump(index, f)
 
 
-def load_index(path: str = "data/index.json") -> dict:
+def load_index(path: str = DEFAULT_INDEX_PATH) -> dict:
     if not os.path.exists(path):
         print(f"Error: {path} not found. Run the crawler and build the index first.")
         return {}
