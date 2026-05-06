@@ -10,6 +10,11 @@ SLEEP = 6
 
 
 def fetch_page(url: str) -> str | None:
+    """Fetch the HTML content of a URL.
+
+    Returns the response text on HTTP 200, or None if the request times out,
+    raises a network error, or returns a non-200 status code.
+    """
     try:
         response = requests.get(url, timeout=TIMEOUT)
     except requests.exceptions.Timeout:
@@ -27,23 +32,39 @@ def fetch_page(url: str) -> str | None:
 
 
 def parse_page(html: str) -> tuple[str, list[str]]:
+    """Parse an HTML page and extract visible text and hyperlinks.
+
+    Strips <script> and <style> tags before extracting text so that JavaScript
+    and CSS don't pollute the index.
+
+    Returns:
+        A (text, links) tuple where text is the visible page content and links
+        is a list of raw href values found in <a> tags.
+    """
     soup = BeautifulSoup(html, "html.parser")
 
-    # strip out script/style tags so we don't get js/css in the text
     for tag in soup(["script", "style"]):
         tag.decompose()
 
     text = soup.get_text(separator=" ", strip=True)
-
     links = [a["href"] for a in soup.find_all("a", href=True)]
 
     return text, links
 
 
 def crawl() -> list[dict]:
-    visited = set()
-    queue = [BASE_URL]
-    results = []
+    """Crawl the target site starting from BASE_URL using breadth-first search.
+
+    Respects a SLEEP-second politeness window between requests and never
+    revisits the same URL twice.
+
+    Returns:
+        A list of {"url": str, "text": str} dicts, one per successfully
+        fetched page.
+    """
+    visited: set[str] = set()
+    queue: list[str] = [BASE_URL]
+    results: list[dict] = []
 
     while queue:
         url = queue.pop(0)
@@ -63,7 +84,6 @@ def crawl() -> list[dict]:
 
         for link in links:
             absolute = urljoin(BASE_URL, link)
-
             if absolute.startswith(BASE_URL) and absolute not in visited:
                 queue.append(absolute)
 
